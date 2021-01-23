@@ -9,8 +9,8 @@ async function run(): Promise<void> {
     core.info(`Versions of python available: ${allPythonVersions}`)
 
     const available = await isAvailable()
-    if (available) {
-      core.info(`Found a python version`)
+    if (available.available) {
+      core.info(`Found a python version ${available.version}`)
     } else {
       core.setFailed(`Did not find a suitable version of python!`)
     }

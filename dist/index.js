@@ -46,8 +46,8 @@ function run() {
             const allPythonVersions = tc.findAllVersions('python');
             core.info(`Versions of python available: ${allPythonVersions}`);
             const available = yield python_1.isAvailable();
-            if (available) {
-                core.info(`Found a python version`);
+            if (available.available) {
+                core.info(`Found a python version ${available.version}`);
             }
             else {
                 core.setFailed(`Did not find a suitable version of python!`);
@@ -105,14 +105,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isAvailable = void 0;
 const exec = __importStar(__nccwpck_require__(514));
+const semver = __importStar(__nccwpck_require__(911));
 function isAvailable() {
     return __awaiter(this, void 0, void 0, function* () {
+        let stdout = '';
+        let stderr = '';
         const options = {
             silent: true,
             ignoreReturnCode: true
         };
+        options.listeners = {
+            stdout: (data) => {
+                stdout += data.toString();
+            },
+            stderr: (data) => {
+                stderr += data.toString();
+            }
+        };
         const returnCode = yield exec.exec(`python`, ['--version'], options);
-        return returnCode === 0;
+        stderr.trim();
+        const version = semver.coerce(stdout.trim().split(' ')[-1]);
+        return {
+            available: returnCode === 0,
+            version: version
+        };
     });
 }
 exports.isAvailable = isAvailable;
