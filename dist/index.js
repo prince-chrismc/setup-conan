@@ -2,6 +2,61 @@ require('./sourcemap-register.js');module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 319:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isAvailable = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const semver = __importStar(__nccwpck_require__(911));
+const exec = __importStar(__nccwpck_require__(369));
+function isAvailable() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const retval = yield exec.exec(`conan`, ['--version'], true);
+        const output = retval.stdout.split(' ');
+        const version = semver.coerce(output[output.length - 1]);
+        core.info(`Detected version: ${version}`);
+        return {
+            available: retval.stderr === '' && retval.success,
+            version: version
+        };
+    });
+}
+exports.isAvailable = isAvailable;
+
+
+/***/ }),
+
 /***/ 109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -38,6 +93,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const python = __importStar(__nccwpck_require__(83));
+const conan = __importStar(__nccwpck_require__(319));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -50,6 +106,16 @@ function run() {
             }
             else {
                 core.setFailed(`Did not find a suitable version of python!`);
+                return;
+            }
+            core.endGroup();
+            core.startGroup(`👀 Looking up Conan`);
+            const client = yield conan.isAvailable();
+            if (client.available) {
+                core.info(`Found conan ${client.version}`);
+            }
+            else {
+                core.setFailed(`Did not find a suitable version of conan!`);
                 return;
             }
             core.endGroup();
@@ -100,41 +166,90 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isAvailable = void 0;
 const core = __importStar(__nccwpck_require__(186));
-const exec = __importStar(__nccwpck_require__(514));
 const tc = __importStar(__nccwpck_require__(784));
 const semver = __importStar(__nccwpck_require__(911));
+const exec = __importStar(__nccwpck_require__(369));
 function isAvailable(pythonCommand) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!pythonCommand.startsWith('python')) {
             throw new Error(`not a valid python command`);
         }
-        let stdout = '';
-        let stderr = '';
-        const options = {
-            silent: true,
-            ignoreReturnCode: true
+        const allPythonVersions = tc.findAllVersions('PyPy');
+        core.info(`Versions of PyPy from tool-cache: ${allPythonVersions}`);
+        const retval = yield exec.exec(pythonCommand, ['--version'], true);
+        const output = retval.stdout.split(' ');
+        const version = semver.coerce(output[output.length - 1]);
+        core.info(`Detected version: ${version}`);
+        return {
+            available: retval.stderr === '' && retval.success,
+            version: version
         };
-        options.listeners = {
+    });
+}
+exports.isAvailable = isAvailable;
+
+
+/***/ }),
+
+/***/ 369:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.exec = void 0;
+const aexec = __importStar(__nccwpck_require__(514));
+const exec = (command, args = [], silent) => __awaiter(void 0, void 0, void 0, function* () {
+    let stdout = '';
+    let stderr = '';
+    const options = {
+        silent,
+        ignoreReturnCode: true,
+        listeners: {
             stdout: (data) => {
                 stdout += data.toString();
             },
             stderr: (data) => {
                 stderr += data.toString();
             }
-        };
-        const allPythonVersions = tc.findAllVersions('PyPy');
-        core.info(`Versions of PyPy from tool-cache: ${allPythonVersions}`);
-        const returnCode = yield exec.exec(pythonCommand, ['--version'], options);
-        const output = stdout.trim().split(' ');
-        const version = semver.coerce(output[output.length - 1]);
-        core.info(`Version check output: ${stdout}`);
-        return {
-            available: stderr === '' && returnCode === 0,
-            version: version
-        };
-    });
-}
-exports.isAvailable = isAvailable;
+        }
+    };
+    const returnCode = yield aexec.exec(command, args, options);
+    return {
+        success: returnCode === 0,
+        stdout: stdout.trim(),
+        stderr: stderr.trim()
+    };
+});
+exports.exec = exec;
 
 
 /***/ }),
