@@ -1,5 +1,5 @@
 {
-  "name": "typescript-action",
+  "name": "setup-conan",
   "version": "0.0.0",
   "private": true,
   "description": "TypeScript template action",
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/prince-chrismc/setup-conan.git"
   },
   "keywords": [
     "actions",
     "node",
     "setup"
   ],
-  "author": "Chris Mc",
+  "author": "prince-chrismc",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.6",

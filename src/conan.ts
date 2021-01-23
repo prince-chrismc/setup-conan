@@ -9,7 +9,15 @@ export interface AvailableResult {
   version: SemVer
 }
 
-export async function isAvailable(): Promise<AvailableResult> {
+export async function isAvailable(
+  pythonCommand: string
+): Promise<AvailableResult> {
+  if (
+    (await exec.exec(pythonCommand, ['-c', '"import conan"'], true)).success
+  ) {
+    return {available: false, version: semver.coerce('0.0.0') as SemVer}
+  }
+
   const retval = await exec.exec(`conan`, ['--version'], true)
   const output = retval.stdout.split(' ')
   const version = semver.coerce(output[output.length - 1])

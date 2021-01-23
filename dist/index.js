@@ -40,8 +40,11 @@ exports.isAvailable = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const semver = __importStar(__nccwpck_require__(911));
 const exec = __importStar(__nccwpck_require__(369));
-function isAvailable() {
+function isAvailable(pythonCommand) {
     return __awaiter(this, void 0, void 0, function* () {
+        if ((yield exec.exec(pythonCommand, ['-c', '"import conan"'], true)).success) {
+            return { available: false, version: semver.coerce('0.0.0') };
+        }
         const retval = yield exec.exec(`conan`, ['--version'], true);
         const output = retval.stdout.split(' ');
         const version = semver.coerce(output[output.length - 1]);
@@ -110,7 +113,7 @@ function run() {
             }
             core.endGroup();
             core.startGroup(`👀 Looking up Conan`);
-            const client = yield conan.isAvailable();
+            const client = yield conan.isAvailable(py);
             if (client.available) {
                 core.info(`Found conan ${client.version}`);
             }

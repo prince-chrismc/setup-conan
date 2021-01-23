@@ -18,7 +18,7 @@ async function run(): Promise<void> {
     core.endGroup()
 
     core.startGroup(`👀 Looking up Conan`)
-    const client = await conan.isAvailable()
+    const client = await conan.isAvailable(py)
     if (client.available) {
       core.info(`Found conan ${client.version}`)
     } else {
