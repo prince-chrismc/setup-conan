@@ -1,11 +1,13 @@
 import * as core from '@actions/core'
 import * as python from './python'
-import {wait} from './wait'
 
 async function run(): Promise<void> {
   try {
+    const py: string = core.getInput('python') || 'python3'
+    core.debug(`Using ${py} for Conan...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+
     core.startGroup(`👀 Looking up Python`)
-    const available = await python.isAvailable()
+    const available = await python.isAvailable(py)
     if (available.available) {
       core.info(`Found a python version ${available.version}`)
     } else {
@@ -13,15 +15,6 @@ async function run(): Promise<void> {
       return
     }
     core.endGroup()
-
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-
-    core.debug(new Date().toTimeString())
-    await wait(+ms)
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
   } catch (error) {
     core.setFailed(error.message)
   }

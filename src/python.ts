@@ -10,7 +10,13 @@ export interface AvailableResult {
   version: SemVer
 }
 
-export async function isAvailable(): Promise<AvailableResult> {
+export async function isAvailable(
+  pythonCommand: string
+): Promise<AvailableResult> {
+  if (!pythonCommand.startsWith('python')) {
+    throw new Error(`not a valid python command`)
+  }
+
   let stdout = ''
   let stderr = ''
   const options: ExecOptions = {
@@ -29,7 +35,11 @@ export async function isAvailable(): Promise<AvailableResult> {
   const allPythonVersions = tc.findAllVersions('PyPy')
   core.info(`Versions of PyPy from tool-cache: ${allPythonVersions}`)
 
-  const returnCode: number = await exec.exec(`python`, ['--version'], options)
+  const returnCode: number = await exec.exec(
+    pythonCommand,
+    ['--version'],
+    options
+  )
   const output = stdout.trim().split(' ')
   const version = semver.coerce(output[output.length - 1])
 
