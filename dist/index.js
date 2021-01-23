@@ -37,25 +37,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-const tc = __importStar(__nccwpck_require__(784));
 const wait_1 = __nccwpck_require__(817);
-const python_1 = __nccwpck_require__(83);
+const python = __importStar(__nccwpck_require__(83));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const allPythonVersions = tc.findAllVersions('PyPy');
-            core.info(`Versions of python available: ${allPythonVersions}`);
-            const available = yield python_1.isAvailable();
+            core.startGroup(`👀 Looking up Python`);
+            const available = yield python.isAvailable();
             if (available.available) {
                 core.info(`Found a python version ${available.version}`);
             }
             else {
                 core.setFailed(`Did not find a suitable version of python!`);
+                return;
             }
+            core.endGroup();
             const ms = core.getInput('milliseconds');
             core.debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
             core.debug(new Date().toTimeString());
-            yield wait_1.wait(parseInt(ms, 10));
+            yield wait_1.wait(+ms);
             core.debug(new Date().toTimeString());
             core.setOutput('time', new Date().toTimeString());
         }
@@ -106,6 +106,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isAvailable = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const exec = __importStar(__nccwpck_require__(514));
+const tc = __importStar(__nccwpck_require__(784));
 const semver = __importStar(__nccwpck_require__(911));
 function isAvailable() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -123,7 +124,9 @@ function isAvailable() {
                 stderr += data.toString();
             }
         };
-        const returnCode = yield exec.exec(`python`, ['--version'], options);
+        const allPythonVersions = tc.findAllVersions('PyPy');
+        core.info(`Versions of python available: ${allPythonVersions}`);
+        const returnCode = yield exec.exec(`python3`, ['--version'], options);
         stderr.trim(); // Shutup linter!
         const version = semver.coerce(stdout.trim().split(' ')[-1]);
         core.info(`Version check output: ${stdout}`);
