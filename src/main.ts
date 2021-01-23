@@ -1,12 +1,11 @@
 import * as core from '@actions/core'
 import * as tc from '@actions/tool-cache'
-import * as style from 'ansi-styles'
 import {wait} from './wait'
 
 async function run(): Promise<void> {
   try {
     const allPythonVersions = tc.findAllVersions('python')
-    core.info(style.color.ansi16m.hex('#abcdef') + `Versions of python available: ${allPythonVersions}`)
+    core.info(`Versions of python available: ${allPythonVersions}`)
 
     const ms: string = core.getInput('milliseconds')
     core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
