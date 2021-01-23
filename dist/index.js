@@ -104,6 +104,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isAvailable = void 0;
+const core = __importStar(__nccwpck_require__(186));
 const exec = __importStar(__nccwpck_require__(514));
 const semver = __importStar(__nccwpck_require__(911));
 function isAvailable() {
@@ -123,8 +124,9 @@ function isAvailable() {
             }
         };
         const returnCode = yield exec.exec(`python`, ['--version'], options);
-        stderr.trim();
+        stderr.trim(); // Shutup linter!
         const version = semver.coerce(stdout.trim().split(' ')[-1]);
+        core.info(`Version check output: ${stdout}`);
         return {
             available: returnCode === 0,
             version: version

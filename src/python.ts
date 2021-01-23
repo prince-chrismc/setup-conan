@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import {ExecOptions} from '@actions/exec'
 import * as semver from 'semver'
@@ -28,6 +29,8 @@ export async function isAvailable(): Promise<AvailableResult> {
 
   stderr.trim() // Shutup linter!
   const version = semver.coerce(stdout.trim().split(' ')[-1])
+
+  core.info(`Version check output: ${stdout}`)
 
   return {
     available: returnCode === 0,
