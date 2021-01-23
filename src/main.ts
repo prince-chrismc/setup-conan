@@ -5,7 +5,7 @@ import {isAvailable} from './python'
 
 async function run(): Promise<void> {
   try {
-    const allPythonVersions = tc.findAllVersions('python')
+    const allPythonVersions = tc.findAllVersions('PyPy')
     core.info(`Versions of python available: ${allPythonVersions}`)
 
     const available = await isAvailable()

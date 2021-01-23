@@ -43,7 +43,7 @@ const python_1 = __nccwpck_require__(83);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const allPythonVersions = tc.findAllVersions('python');
+            const allPythonVersions = tc.findAllVersions('PyPy');
             core.info(`Versions of python available: ${allPythonVersions}`);
             const available = yield python_1.isAvailable();
             if (available.available) {
