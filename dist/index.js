@@ -37,8 +37,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(817);
 const python = __importStar(__nccwpck_require__(83));
+const wait_1 = __nccwpck_require__(817);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -125,13 +125,13 @@ function isAvailable() {
             }
         };
         const allPythonVersions = tc.findAllVersions('PyPy');
-        core.info(`Versions of python available: ${allPythonVersions}`);
-        const returnCode = yield exec.exec(`python3`, ['--version'], options);
-        stderr.trim(); // Shutup linter!
-        const version = semver.coerce(stdout.trim().split(' ')[-1]);
+        core.info(`Versions of PyPy from tool-cache: ${allPythonVersions}`);
+        const returnCode = yield exec.exec(`python`, ['--version'], options);
+        const output = stdout.trim().split(' ');
+        const version = semver.coerce(output[output.length - 1]);
         core.info(`Version check output: ${stdout}`);
         return {
-            available: returnCode === 0,
+            available: stderr === '' && returnCode === 0,
             version: version
         };
     });

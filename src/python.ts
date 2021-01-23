@@ -27,17 +27,16 @@ export async function isAvailable(): Promise<AvailableResult> {
   }
 
   const allPythonVersions = tc.findAllVersions('PyPy')
-  core.info(`Versions of python available: ${allPythonVersions}`)
+  core.info(`Versions of PyPy from tool-cache: ${allPythonVersions}`)
 
-  const returnCode: number = await exec.exec(`python3`, ['--version'], options)
-
-  stderr.trim() // Shutup linter!
-  const version = semver.coerce(stdout.trim().split(' ')[-1])
+  const returnCode: number = await exec.exec(`python`, ['--version'], options)
+  const output = stdout.trim().split(' ')
+  const version = semver.coerce(output[output.length - 1])
 
   core.info(`Version check output: ${stdout}`)
 
   return {
-    available: returnCode === 0,
+    available: stderr === '' && returnCode === 0,
     version: version as SemVer
   }
 }
