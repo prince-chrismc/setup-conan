@@ -39,12 +39,23 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.install = exports.setup = exports.getVersion = exports.isAvailable = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const tc = __importStar(__nccwpck_require__(784));
+const io = __importStar(__nccwpck_require__(436));
 const semver = __importStar(__nccwpck_require__(911));
 const exec = __importStar(__nccwpck_require__(369));
 const python = __importStar(__nccwpck_require__(83));
 function isAvailable(pythonCommand) {
     return __awaiter(this, void 0, void 0, function* () {
-        return python.hasModule(pythonCommand, 'conan');
+        if (python.hasModule(pythonCommand, 'conan')) {
+            try {
+                const conanInPath = yield io.which('conan', true);
+                core.info(`Found tool in PATH: ${conanInPath}`);
+                return true;
+            }
+            catch (error) {
+                core.info('conan python module exists but exe is missing');
+            }
+        }
+        return false;
     });
 }
 exports.isAvailable = isAvailable;

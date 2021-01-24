@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as tc from '@actions/tool-cache'
+import * as io from '@actions/io'
 import * as semver from 'semver'
 import {SemVer} from 'semver'
 
@@ -13,7 +14,18 @@ export interface VersionResult {
 }
 
 export async function isAvailable(pythonCommand: string): Promise<boolean> {
-  return python.hasModule(pythonCommand, 'conan')
+  if (python.hasModule(pythonCommand, 'conan')) {
+    try {
+      const conanInPath: string = await io.which('conan', true)
+      core.info(`Found tool in PATH: ${conanInPath}`)
+
+      return true
+    } catch (error) {
+      core.info('conan python module exists but exe is missing')
+    }
+  }
+
+  return false
 }
 
 export async function getVersion(): Promise<VersionResult> {
