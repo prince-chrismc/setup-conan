@@ -42,16 +42,18 @@ export async function install(
 
   let retval: ExecResult
   if (inputVersion === 'latest') {
+    core.info(`Processing to install the newest client version`)
     retval = await exec.exec(
       pythonCommand,
       ['-m', 'pip', 'install', '--upgrade', 'conan'],
-      true
+      false
     )
   } else {
+    core.info(`Processing to install version: ${inputVersion}`)
     retval = await exec.exec(
       pythonCommand,
       ['-m', 'pip', 'install', `conan==${inputVersion}`],
-      true
+      false
     )
   }
 
@@ -62,7 +64,7 @@ export async function install(
   retval = await exec.exec(
     pythonCommand,
     ['-c', '"import conan as _; print(_.__path__[0])"'],
-    true
+    false
   )
   if (!retval.success) {
     throw new Error('failed to get install location of conan')
@@ -72,7 +74,7 @@ export async function install(
   retval = await exec.exec(
     pythonCommand,
     ['-c', '"from conans import __version__ ; print(__version__)"'],
-    true
+    false
   )
   if (!retval.success) {
     throw new Error('failed to get install versoion of conan')

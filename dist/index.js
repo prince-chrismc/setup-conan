@@ -68,20 +68,22 @@ function install(inputVersion, pythonCommand) {
         // TODO: verify input version against published releases
         let retval;
         if (inputVersion === 'latest') {
-            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', '--upgrade', 'conan'], true);
+            core.info(`Processing to install the newest client version`);
+            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', '--upgrade', 'conan'], false);
         }
         else {
-            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', `conan==${inputVersion}`], true);
+            core.info(`Processing to install version: ${inputVersion}`);
+            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', `conan==${inputVersion}`], false);
         }
         if (!retval.success) {
             throw new Error('failed to install conan');
         }
-        retval = yield exec.exec(pythonCommand, ['-c', '"import conan as _; print(_.__path__[0])"'], true);
+        retval = yield exec.exec(pythonCommand, ['-c', '"import conan as _; print(_.__path__[0])"'], false);
         if (!retval.success) {
             throw new Error('failed to get install location of conan');
         }
         const installDir = retval.stdout;
-        retval = yield exec.exec(pythonCommand, ['-c', '"from conans import __version__ ; print(__version__)"'], true);
+        retval = yield exec.exec(pythonCommand, ['-c', '"from conans import __version__ ; print(__version__)"'], false);
         if (!retval.success) {
             throw new Error('failed to get install versoion of conan');
         }
