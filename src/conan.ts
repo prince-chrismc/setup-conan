@@ -71,7 +71,7 @@ export async function install(
     core.info(`Processing to install the newest client version`)
     retval = await exec.exec(
       pythonCommand,
-      ['-m', 'pip', 'install', '--upgrade', 'conan'],
+      ['-m', 'pip', 'install', '--upgrade', 'setuptools', 'conan'],
       false
     )
   } else {

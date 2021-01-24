@@ -91,7 +91,7 @@ function install(inputVersion, pythonCommand) {
         let retval;
         if (inputVersion === 'latest') {
             core.info(`Processing to install the newest client version`);
-            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', '--upgrade', 'conan'], false);
+            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', '--upgrade', 'setuptools', 'conan'], false);
         }
         else {
             core.info(`Processing to install version: ${inputVersion}`);
