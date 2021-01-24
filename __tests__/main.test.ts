@@ -1,11 +1,11 @@
-import {isAvailable} from '../src/python'
+import {getVersion} from '../src/python'
 import * as process from 'process'
 import * as cp from 'child_process'
 import * as path from 'path'
 
 test('throws invalid number', async () => {
   const input = 'some_fun_command'
-  await expect(isAvailable(input)).rejects.toThrow('not a valid python command')
+  await expect(getVersion(input)).rejects.toThrow('not a valid python command')
 })
 
 // test('wait 500 ms', async () => {

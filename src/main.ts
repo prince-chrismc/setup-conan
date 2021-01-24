@@ -8,9 +8,9 @@ async function run(): Promise<void> {
     core.debug(`Using ${py} for Conan...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
 
     core.startGroup(`👀 Looking up Python`)
-    const available = await python.isAvailable(py)
-    if (available.available) {
-      core.info(`Found a python version ${available.version}`)
+    const pi = await python.getVersion(py)
+    if (pi.success) {
+      core.info(`Found a python version ${pi.version}`)
     } else {
       core.setFailed(`Did not find a suitable version of python!`)
       return
@@ -19,13 +19,14 @@ async function run(): Promise<void> {
 
     core.startGroup(`👀 Looking up Conan`)
     const client = await conan.isAvailable(py)
-    if (client.available) {
-      core.info(`Found conan ${client.version}`)
-    } else {
-      core.setFailed(`Did not find a suitable version of conan!`)
-      return
-    }
     core.endGroup()
+
+    if (!client) {
+      core.startGroup(`👉 Installing Conan`)
+      const version = core.getInput('version') || 'latest'
+      await conan.install(version, py)
+      core.endGroup()
+    }
   } catch (error) {
     core.setFailed(error.message)
   }

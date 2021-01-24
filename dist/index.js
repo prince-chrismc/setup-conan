@@ -36,26 +36,60 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isAvailable = void 0;
+exports.install = exports.getVersion = exports.isAvailable = void 0;
 const core = __importStar(__nccwpck_require__(186));
+const tc = __importStar(__nccwpck_require__(784));
 const semver = __importStar(__nccwpck_require__(911));
 const exec = __importStar(__nccwpck_require__(369));
 function isAvailable(pythonCommand) {
     return __awaiter(this, void 0, void 0, function* () {
         if ((yield exec.exec(pythonCommand, ['-c', '"import conan"'], true)).success) {
-            return { available: false, version: semver.coerce('0.0.0') };
+            return false;
         }
+        return true;
+    });
+}
+exports.isAvailable = isAvailable;
+function getVersion() {
+    return __awaiter(this, void 0, void 0, function* () {
         const retval = yield exec.exec(`conan`, ['--version'], true);
         const output = retval.stdout.split(' ');
         const version = semver.coerce(output[output.length - 1]);
         core.info(`Detected version: ${version}`);
         return {
-            available: retval.stderr === '' && retval.success,
+            success: retval.stderr === '' && retval.success,
             version: version
         };
     });
 }
-exports.isAvailable = isAvailable;
+exports.getVersion = getVersion;
+function install(inputVersion, pythonCommand) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // TODO: verify input version against published releases
+        let retval;
+        if (inputVersion === 'latest') {
+            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', '--upgrade', 'conan'], true);
+        }
+        else {
+            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', `conan==${inputVersion}`], true);
+        }
+        if (!retval.success) {
+            throw new Error('failed to install conan');
+        }
+        retval = yield exec.exec(pythonCommand, ['-c', '"import conan as _; print(_.__path__[0])"'], true);
+        if (!retval.success) {
+            throw new Error('failed to get install location of conan');
+        }
+        const installDir = retval.stdout;
+        retval = yield exec.exec(pythonCommand, ['-c', '"from conans import __version__ ; print(__version__)"'], true);
+        if (!retval.success) {
+            throw new Error('failed to get install versoion of conan');
+        }
+        const installVersion = retval.stdout;
+        return yield tc.cacheDir(installDir, 'conan', installVersion);
+    });
+}
+exports.install = install;
 
 
 /***/ }),
@@ -103,9 +137,9 @@ function run() {
             const py = core.getInput('python') || 'python3';
             core.debug(`Using ${py} for Conan...`); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
             core.startGroup(`👀 Looking up Python`);
-            const available = yield python.isAvailable(py);
-            if (available.available) {
-                core.info(`Found a python version ${available.version}`);
+            const pi = yield python.getVersion(py);
+            if (pi.success) {
+                core.info(`Found a python version ${pi.version}`);
             }
             else {
                 core.setFailed(`Did not find a suitable version of python!`);
@@ -114,14 +148,13 @@ function run() {
             core.endGroup();
             core.startGroup(`👀 Looking up Conan`);
             const client = yield conan.isAvailable(py);
-            if (client.available) {
-                core.info(`Found conan ${client.version}`);
-            }
-            else {
-                core.setFailed(`Did not find a suitable version of conan!`);
-                return;
-            }
             core.endGroup();
+            if (!client) {
+                core.startGroup(`👉 Installing Conan`);
+                const version = core.getInput('version') || 'latest';
+                yield conan.install(version, py);
+                core.endGroup();
+            }
         }
         catch (error) {
             core.setFailed(error.message);
@@ -167,29 +200,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isAvailable = void 0;
+exports.getVersion = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const tc = __importStar(__nccwpck_require__(784));
 const semver = __importStar(__nccwpck_require__(911));
 const exec = __importStar(__nccwpck_require__(369));
-function isAvailable(pythonCommand) {
+function getVersion(pythonCommand) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!pythonCommand.startsWith('python')) {
             throw new Error(`not a valid python command`);
         }
-        const allPythonVersions = tc.findAllVersions('PyPy');
+        const allPythonVersions = tc.findAllVersions('Python');
         core.info(`Versions of PyPy from tool-cache: ${allPythonVersions}`);
+        const allPyPyVersions = tc.findAllVersions('PyPy');
+        core.info(`Versions of PyPy from tool-cache: ${allPyPyVersions}`);
         const retval = yield exec.exec(pythonCommand, ['--version'], true);
         const output = retval.stdout.split(' ');
         const version = semver.coerce(output[output.length - 1]);
         core.info(`Detected version: ${version}`);
         return {
-            available: retval.stderr === '' && retval.success,
+            success: retval.stderr === '' && retval.success,
             version: version
         };
     });
 }
-exports.isAvailable = isAvailable;
+exports.getVersion = getVersion;
 
 
 /***/ }),

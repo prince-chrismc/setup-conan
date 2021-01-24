@@ -5,20 +5,23 @@ import {SemVer} from 'semver'
 
 import * as exec from './util/exec'
 
-export interface AvailableResult {
-  available: boolean
+export interface VersionResult {
+  success: boolean
   version: SemVer
 }
 
-export async function isAvailable(
+export async function getVersion(
   pythonCommand: string
-): Promise<AvailableResult> {
+): Promise<VersionResult> {
   if (!pythonCommand.startsWith('python')) {
     throw new Error(`not a valid python command`)
   }
 
-  const allPythonVersions = tc.findAllVersions('PyPy')
+  const allPythonVersions = tc.findAllVersions('Python')
   core.info(`Versions of PyPy from tool-cache: ${allPythonVersions}`)
+
+  const allPyPyVersions = tc.findAllVersions('PyPy')
+  core.info(`Versions of PyPy from tool-cache: ${allPyPyVersions}`)
 
   const retval = await exec.exec(pythonCommand, ['--version'], true)
   const output = retval.stdout.split(' ')
@@ -27,7 +30,7 @@ export async function isAvailable(
   core.info(`Detected version: ${version}`)
 
   return {
-    available: retval.stderr === '' && retval.success,
+    success: retval.stderr === '' && retval.success,
     version: version as SemVer
   }
 }
