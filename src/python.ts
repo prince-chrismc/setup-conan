@@ -18,7 +18,7 @@ export async function getVersion(
   }
 
   const allPythonVersions = tc.findAllVersions('Python')
-  core.info(`Versions of PyPy from tool-cache: ${allPythonVersions}`)
+  core.info(`Versions of Python from tool-cache: ${allPythonVersions}`)
 
   const allPyPyVersions = tc.findAllVersions('PyPy')
   core.info(`Versions of PyPy from tool-cache: ${allPyPyVersions}`)
@@ -40,7 +40,8 @@ export async function hasModule(
   module: string
 ): Promise<boolean> {
   if (
-    (await exec.exec(pythonCommand, ['-c', `"import ${module}"`], true)).success
+    (await exec.exec(pythonCommand, ['-c', `"import ${module}"`], false))
+      .success
   ) {
     core.info(`found python module ${module}`)
     return true
