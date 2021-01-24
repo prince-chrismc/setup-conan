@@ -27,6 +27,8 @@ async function run(): Promise<void> {
       await conan.install(version, py)
       core.endGroup()
     }
+
+    conan.getVersion()
   } catch (error) {
     core.setFailed(error.message)
   }

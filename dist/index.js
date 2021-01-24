@@ -168,6 +168,7 @@ function run() {
                 yield conan.install(version, py);
                 core.endGroup();
             }
+            conan.getVersion();
         }
         catch (error) {
             core.setFailed(error.message);
@@ -240,7 +241,8 @@ function getVersion(pythonCommand) {
 exports.getVersion = getVersion;
 function hasModule(pythonCommand, module) {
     return __awaiter(this, void 0, void 0, function* () {
-        if ((yield exec.exec(pythonCommand, ['-c', `"import ${module}"`], false)).success) {
+        if ((yield exec.exec(pythonCommand, ['-c', `"import ${module}"`], false))
+            .success) {
             core.info(`found python module ${module}`);
             return true;
         }
