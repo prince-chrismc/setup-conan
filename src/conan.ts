@@ -31,7 +31,7 @@ export async function getVersion(): Promise<VersionResult> {
 
 export async function setup(pythonCommand: string): Promise<boolean> {
   if (!python.hasModule(pythonCommand, 'setuptools')) {
-    core.info(`Commencing the installation for 'setuptool'`)
+    core.info(`Commencing the installation for 'setuptools'`)
     const retval = await exec.exec(
       pythonCommand,
       ['-m', 'pip', 'install', 'setuptools'],

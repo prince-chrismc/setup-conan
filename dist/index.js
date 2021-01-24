@@ -64,7 +64,7 @@ exports.getVersion = getVersion;
 function setup(pythonCommand) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!python.hasModule(pythonCommand, 'setuptools')) {
-            core.info(`Commencing the installation for 'setuptool'`);
+            core.info(`Commencing the installation for 'setuptools'`);
             const retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', 'setuptools'], false);
             return retval.success;
         }
@@ -241,9 +241,10 @@ exports.getVersion = getVersion;
 function hasModule(pythonCommand, module) {
     return __awaiter(this, void 0, void 0, function* () {
         if ((yield exec.exec(pythonCommand, ['-c', `"import ${module}"`], true)).success) {
-            return false;
+            core.info(`found python module ${module}`);
+            return true;
         }
-        return true;
+        return false;
     });
 }
 exports.hasModule = hasModule;

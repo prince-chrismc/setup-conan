@@ -42,8 +42,9 @@ export async function hasModule(
   if (
     (await exec.exec(pythonCommand, ['-c', `"import ${module}"`], true)).success
   ) {
-    return false
+    core.info(`found python module ${module}`)
+    return true
   }
 
-  return true
+  return false
 }
