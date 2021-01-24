@@ -36,17 +36,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.install = exports.getVersion = exports.isAvailable = void 0;
+exports.install = exports.setup = exports.getVersion = exports.isAvailable = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const tc = __importStar(__nccwpck_require__(784));
 const semver = __importStar(__nccwpck_require__(911));
 const exec = __importStar(__nccwpck_require__(369));
+const python = __importStar(__nccwpck_require__(83));
 function isAvailable(pythonCommand) {
     return __awaiter(this, void 0, void 0, function* () {
-        if ((yield exec.exec(pythonCommand, ['-c', '"import conan"'], true)).success) {
-            return false;
-        }
-        return true;
+        return python.hasModule(pythonCommand, 'conan');
     });
 }
 exports.isAvailable = isAvailable;
@@ -63,9 +61,22 @@ function getVersion() {
     });
 }
 exports.getVersion = getVersion;
+function setup(pythonCommand) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!python.hasModule(pythonCommand, 'setuptools')) {
+            core.info(`Commencing the installation for 'setuptool'`);
+            const retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', 'setuptools'], false);
+            return retval.success;
+        }
+        return true;
+    });
+}
+exports.setup = setup;
 function install(inputVersion, pythonCommand) {
     return __awaiter(this, void 0, void 0, function* () {
         // TODO: verify input version against published releases
+        setup(pythonCommand);
+        // tc.downloadFile https://files.pythonhosted.org/packages/cf/3b/7fc6030e64609ef6ddf9a3f88c297794d59d89fd2ab13989a9aee47cad02/conan-1.33.0.tar.gz
         let retval;
         if (inputVersion === 'latest') {
             core.info(`Processing to install the newest client version`);
@@ -202,7 +213,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getVersion = void 0;
+exports.hasModule = exports.getVersion = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const tc = __importStar(__nccwpck_require__(784));
 const semver = __importStar(__nccwpck_require__(911));
@@ -227,6 +238,15 @@ function getVersion(pythonCommand) {
     });
 }
 exports.getVersion = getVersion;
+function hasModule(pythonCommand, module) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if ((yield exec.exec(pythonCommand, ['-c', `"import ${module}"`], true)).success) {
+            return false;
+        }
+        return true;
+    });
+}
+exports.hasModule = hasModule;
 
 
 /***/ }),

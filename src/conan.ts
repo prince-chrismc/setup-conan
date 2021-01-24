@@ -5,6 +5,7 @@ import {SemVer} from 'semver'
 
 import * as exec from './util/exec'
 import {ExecResult} from './util/exec'
+import * as python from './python'
 
 export interface VersionResult {
   success: boolean
@@ -12,13 +13,7 @@ export interface VersionResult {
 }
 
 export async function isAvailable(pythonCommand: string): Promise<boolean> {
-  if (
-    (await exec.exec(pythonCommand, ['-c', '"import conan"'], true)).success
-  ) {
-    return false
-  }
-
-  return true
+  return python.hasModule(pythonCommand, 'conan')
 }
 
 export async function getVersion(): Promise<VersionResult> {
@@ -34,11 +29,30 @@ export async function getVersion(): Promise<VersionResult> {
   }
 }
 
+export async function setup(pythonCommand: string): Promise<boolean> {
+  if (!python.hasModule(pythonCommand, 'setuptools')) {
+    core.info(`Commencing the installation for 'setuptool'`)
+    const retval = await exec.exec(
+      pythonCommand,
+      ['-m', 'pip', 'install', 'setuptools'],
+      false
+    )
+
+    return retval.success
+  }
+
+  return true
+}
+
 export async function install(
   inputVersion: string,
   pythonCommand: string
 ): Promise<string> {
   // TODO: verify input version against published releases
+
+  setup(pythonCommand)
+
+  // tc.downloadFile https://files.pythonhosted.org/packages/cf/3b/7fc6030e64609ef6ddf9a3f88c297794d59d89fd2ab13989a9aee47cad02/conan-1.33.0.tar.gz
 
   let retval: ExecResult
   if (inputVersion === 'latest') {

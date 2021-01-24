@@ -34,3 +34,16 @@ export async function getVersion(
     version: version as SemVer
   }
 }
+
+export async function hasModule(
+  pythonCommand: string,
+  module: string
+): Promise<boolean> {
+  if (
+    (await exec.exec(pythonCommand, ['-c', `"import ${module}"`], true)).success
+  ) {
+    return false
+  }
+
+  return true
+}
