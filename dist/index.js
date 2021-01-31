@@ -55,6 +55,7 @@ function run() {
             core.info(`Successfully created ${destinationPath}`);
             const extractedPath = yield tc.extractTar(downloaded, destination);
             core.info(`Successfully extracted ${downloaded} to ${extractedPath}`);
+            exec.exec('ls', ['-laR']);
             const requirementsPath = path.join(extractedPath, 'requirements.txt');
             exec.exec('pip', ['install', '-r', `${requirementsPath}`]);
             os.tmpdir();
