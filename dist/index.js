@@ -53,17 +53,7 @@ function run() {
             const extractedPath = yield tc.extractTar(downloaded, destination);
             core.info(`Successfully extracted ${downloaded} to ${extractedPath}`);
             const sourcePath = path.join(extractedPath, `conan-${version}`);
-            const requirementsPath = path.join(sourcePath, 'requirements.txt');
-            exec.exec('pip', ['install', '-r', `${requirementsPath}`]);
-            os.tmpdir();
-            const installPath = path.join(os.tmpdir(), 'conan');
-            /*const returnCode: number = await*/ exec.exec('pip', [
-                'install',
-                '--disable-pip-version-check',
-                `${sourcePath}`
-            ]);
-            const binPath = path.join(installPath, 'bin');
-            core.addPath(binPath);
+            exec.exec('pip', ['install', '--disable-pip-version-check', `${sourcePath}`]);
         }
         catch (error) {
             core.setFailed(error.message);

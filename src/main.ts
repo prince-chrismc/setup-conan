@@ -19,19 +19,11 @@ async function run(): Promise<void> {
     core.info(`Successfully extracted ${downloaded} to ${extractedPath}`)
     const sourcePath = path.join(extractedPath, `conan-${version}`)
 
-    const requirementsPath = path.join(sourcePath, 'requirements.txt')
-    exec.exec('pip', ['install', '-r', `${requirementsPath}`])
-
-    os.tmpdir()
-    const installPath = path.join(os.tmpdir(), 'conan')
-    /*const returnCode: number = await*/ exec.exec('pip', [
+    exec.exec('pip', [
       'install',
       '--disable-pip-version-check',
       `${sourcePath}`
     ])
-
-    const binPath = path.join(installPath, 'bin')
-    core.addPath(binPath)
   } catch (error) {
     core.setFailed(error.message)
   }
