@@ -55,8 +55,8 @@ function run() {
             core.info(`Successfully created ${destinationPath}`);
             const extractedPath = yield tc.extractTar(downloaded, destination);
             core.info(`Successfully extracted ${downloaded} to ${extractedPath}`);
-            exec.exec('ls', ['-laR', `${extractedPath}`]);
-            const requirementsPath = path.join(extractedPath, 'requirements.txt');
+            const sourcePath = path.join(extractedPath, `conan-${version}`);
+            const requirementsPath = path.join(sourcePath, 'requirements.txt');
             exec.exec('pip', ['install', '-r', `${requirementsPath}`]);
             os.tmpdir();
             const installPath = path.join(os.tmpdir(), 'conan');
@@ -64,7 +64,7 @@ function run() {
                 'install',
                 '-t',
                 `${installPath}`,
-                `${extractedPath}`
+                `${sourcePath}`
             ]);
             core.addPath(installPath);
         }

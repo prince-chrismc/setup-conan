@@ -20,9 +20,9 @@ async function run(): Promise<void> {
 
     const extractedPath = await tc.extractTar(downloaded, destination)
     core.info(`Successfully extracted ${downloaded} to ${extractedPath}`)
-    exec.exec('ls', ['-laR', `${extractedPath}`])
+    const sourcePath = path.join(extractedPath, `conan-${version}`)
 
-    const requirementsPath = path.join(extractedPath, 'requirements.txt')
+    const requirementsPath = path.join(sourcePath, 'requirements.txt')
     exec.exec('pip', ['install', '-r', `${requirementsPath}`])
 
     os.tmpdir()
@@ -31,7 +31,7 @@ async function run(): Promise<void> {
       'install',
       '-t',
       `${installPath}`,
-      `${extractedPath}`
+      `${sourcePath}`
     ])
 
     core.addPath(installPath)
