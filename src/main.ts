@@ -28,12 +28,13 @@ async function run(): Promise<void> {
       'install',
       '-v',
       '--disable-pip-version-check',
-      '-t',
+      '--root',
       `${installPath}`,
       `${sourcePath}`
     ])
 
-    core.addPath(installPath)
+    const binPath = path.join(installPath, 'bin')
+    core.addPath(binPath)
   } catch (error) {
     core.setFailed(error.message)
   }

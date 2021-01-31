@@ -58,12 +58,15 @@ function run() {
             os.tmpdir();
             const installPath = path.join(os.tmpdir(), 'conan');
             /*const returnCode: number = await*/ exec.exec('pip', [
-                'install', '-v', '--disable-pip-version-check',
-                '-t',
+                'install',
+                '-v',
+                '--disable-pip-version-check',
+                '--root',
                 `${installPath}`,
                 `${sourcePath}`
             ]);
-            core.addPath(installPath);
+            const binPath = path.join(installPath, 'bin');
+            core.addPath(binPath);
         }
         catch (error) {
             core.setFailed(error.message);
