@@ -47,21 +47,18 @@ function run() {
         try {
             const version = '1.33.0';
             const downloadUrl = `https://github.com/conan-io/conan/archive/${version}.tar.gz`;
-            const destination = path.join(os.homedir(), '.conan');
-            core.info(`Install destination is ${destination}`);
             const downloaded = yield tc.downloadTool(downloadUrl);
             core.info(`successfully downloaded ${downloadUrl}`);
+            const destination = path.join(os.tmpdir(), 'source');
+            core.info(`Install destination is ${destination}`);
             const destinationPath = yield makeDir.default(destination);
             core.info(`Successfully created ${destinationPath}`);
             const extractedPath = yield tc.extractTar(downloaded, destination);
             core.info(`Successfully extracted ${downloaded} to ${extractedPath}`);
             const requirementsPath = path.join(extractedPath, 'requirements.txt');
-            exec.exec('pip', [
-                'install',
-                '-r',
-                `${requirementsPath}`
-            ]);
-            const installPath = path.join(destination, 'installation');
+            exec.exec('pip', ['install', '-r', `${requirementsPath}`]);
+            os.tmpdir();
+            const installPath = path.join(os.tmpdir(), 'conan');
             /*const returnCode: number = await*/ exec.exec('pip', [
                 'install',
                 '-t',
