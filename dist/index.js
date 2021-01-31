@@ -59,10 +59,7 @@ function run() {
             const installPath = path.join(os.tmpdir(), 'conan');
             /*const returnCode: number = await*/ exec.exec('pip', [
                 'install',
-                '-v',
                 '--disable-pip-version-check',
-                '--root',
-                `${installPath}`,
                 `${sourcePath}`
             ]);
             const binPath = path.join(installPath, 'bin');
