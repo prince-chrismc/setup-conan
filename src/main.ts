@@ -1,34 +1,36 @@
 import * as core from '@actions/core'
-import * as python from './python'
-import * as conan from './conan'
+import * as tc from '@actions/tool-cache'
+import * as exec from '@actions/exec'
+import * as os from 'os'
+import * as path from 'path'
+import * as makeDir from 'make-dir'
 
 async function run(): Promise<void> {
   try {
-    const py: string = core.getInput('python') || 'python3'
-    core.debug(`Using ${py} for Conan...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+    const version = '1.33.0'
 
-    core.startGroup(`👀 Looking up Python`)
-    const pi = await python.getVersion(py)
-    if (pi.success) {
-      core.info(`Found a python version ${pi.version}`)
-    } else {
-      core.setFailed(`Did not find a suitable version of python!`)
-      return
-    }
-    core.endGroup()
+    const downloadUrl = `https://github.com/conan-io/conan/archive/${version}.tar.gz`
+    const destination = path.join(os.homedir(), '.conan')
+    core.info(`Install destination is ${destination}`)
 
-    core.startGroup(`👀 Looking up Conan`)
-    const client = await conan.isAvailable(py)
-    core.endGroup()
+    const downloaded = await tc.downloadTool(downloadUrl)
+    core.info(`successfully downloaded ${downloadUrl}`)
 
-    if (!client) {
-      core.startGroup(`👉 Installing Conan`)
-      const version = core.getInput('version') || 'latest'
-      await conan.install(version, py)
-      core.endGroup()
-    }
+    const destinationPath = await makeDir.default(destination)
+    core.info(`Successfully created ${destinationPath}`)
 
-    conan.getVersion()
+    const extractedPath = await tc.extractTar(downloaded, destination)
+    core.info(`Successfully extracted ${downloaded} to ${extractedPath}`)
+
+    const installPath = path.join(destination, 'installation')
+    /*const returnCode: number = await*/ exec.exec('pip', [
+      'install',
+      '-t',
+      `${installPath}`,
+      `${extractedPath}`
+    ])
+
+    core.addPath(installPath)
   } catch (error) {
     core.setFailed(error.message)
   }

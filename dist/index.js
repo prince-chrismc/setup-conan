@@ -2,122 +2,6 @@ require('./sourcemap-register.js');module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 319:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.install = exports.setup = exports.getVersion = exports.isAvailable = void 0;
-const core = __importStar(__nccwpck_require__(186));
-const tc = __importStar(__nccwpck_require__(784));
-const io = __importStar(__nccwpck_require__(436));
-const semver = __importStar(__nccwpck_require__(911));
-const exec = __importStar(__nccwpck_require__(369));
-const python = __importStar(__nccwpck_require__(83));
-function isAvailable(pythonCommand) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (python.hasModule(pythonCommand, 'conan')) {
-            try {
-                const conanInPath = yield io.which('conan', true);
-                core.info(`Found tool in PATH: ${conanInPath}`);
-                return true;
-            }
-            catch (error) {
-                core.info('conan python module exists but exe is missing');
-            }
-        }
-        return false;
-    });
-}
-exports.isAvailable = isAvailable;
-function getVersion() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const retval = yield exec.exec(`conan`, ['--version'], true);
-        const output = retval.stdout.split(' ');
-        const version = semver.coerce(output[output.length - 1]);
-        core.info(`Detected version: ${version}`);
-        return {
-            success: retval.stderr === '' && retval.success,
-            version: version
-        };
-    });
-}
-exports.getVersion = getVersion;
-function setup(pythonCommand) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!python.hasModule(pythonCommand, 'setuptools')) {
-            core.info(`Commencing the installation for 'setuptools'`);
-            const retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', 'setuptools'], false);
-            return retval.success;
-        }
-        return true;
-    });
-}
-exports.setup = setup;
-function install(inputVersion, pythonCommand) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // TODO: verify input version against published releases
-        setup(pythonCommand);
-        // tc.downloadFile https://files.pythonhosted.org/packages/cf/3b/7fc6030e64609ef6ddf9a3f88c297794d59d89fd2ab13989a9aee47cad02/conan-1.33.0.tar.gz
-        let retval;
-        if (inputVersion === 'latest') {
-            core.info(`Processing to install the newest client version`);
-            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', '--upgrade', 'setuptools', 'conan'], false);
-        }
-        else {
-            core.info(`Processing to install version: ${inputVersion}`);
-            retval = yield exec.exec(pythonCommand, ['-m', 'pip', 'install', `conan==${inputVersion}`], false);
-        }
-        if (!retval.success) {
-            throw new Error('failed to install conan');
-        }
-        retval = yield exec.exec(pythonCommand, ['-c', '"import conan as _; print(_.__path__[0])"'], false);
-        if (!retval.success) {
-            throw new Error('failed to get install location of conan');
-        }
-        const installDir = retval.stdout;
-        retval = yield exec.exec(pythonCommand, ['-c', '"from conans import __version__ ; print(__version__)"'], false);
-        if (!retval.success) {
-            throw new Error('failed to get install versoion of conan');
-        }
-        const installVersion = retval.stdout;
-        return yield tc.cacheDir(installDir, 'conan', installVersion);
-    });
-}
-exports.install = install;
-
-
-/***/ }),
-
 /***/ 109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -153,33 +37,32 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-const python = __importStar(__nccwpck_require__(83));
-const conan = __importStar(__nccwpck_require__(319));
+const tc = __importStar(__nccwpck_require__(784));
+const exec = __importStar(__nccwpck_require__(514));
+const os = __importStar(__nccwpck_require__(87));
+const path = __importStar(__nccwpck_require__(622));
+const makeDir = __importStar(__nccwpck_require__(126));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const py = core.getInput('python') || 'python3';
-            core.debug(`Using ${py} for Conan...`); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-            core.startGroup(`👀 Looking up Python`);
-            const pi = yield python.getVersion(py);
-            if (pi.success) {
-                core.info(`Found a python version ${pi.version}`);
-            }
-            else {
-                core.setFailed(`Did not find a suitable version of python!`);
-                return;
-            }
-            core.endGroup();
-            core.startGroup(`👀 Looking up Conan`);
-            const client = yield conan.isAvailable(py);
-            core.endGroup();
-            if (!client) {
-                core.startGroup(`👉 Installing Conan`);
-                const version = core.getInput('version') || 'latest';
-                yield conan.install(version, py);
-                core.endGroup();
-            }
-            conan.getVersion();
+            const version = '1.33.0';
+            const downloadUrl = `https://github.com/conan-io/conan/archive/${version}.tar.gz`;
+            const destination = path.join(os.homedir(), '.conan');
+            core.info(`Install destination is ${destination}`);
+            const downloaded = yield tc.downloadTool(downloadUrl);
+            core.info(`successfully downloaded ${downloadUrl}`);
+            const destinationPath = yield makeDir.default(destination);
+            core.info(`Successfully created ${destinationPath}`);
+            const extractedPath = yield tc.extractTar(downloaded, destination);
+            core.info(`Successfully extracted ${downloaded} to ${extractedPath}`);
+            const installPath = path.join(destination, 'installation');
+            /*const returnCode: number = await*/ exec.exec('pip', [
+                'install',
+                '-t',
+                `${installPath}`,
+                `${extractedPath}`
+            ]);
+            core.addPath(installPath);
         }
         catch (error) {
             core.setFailed(error.message);
@@ -187,143 +70,6 @@ function run() {
     });
 }
 run();
-
-
-/***/ }),
-
-/***/ 83:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.hasModule = exports.getVersion = void 0;
-const core = __importStar(__nccwpck_require__(186));
-const tc = __importStar(__nccwpck_require__(784));
-const semver = __importStar(__nccwpck_require__(911));
-const exec = __importStar(__nccwpck_require__(369));
-function getVersion(pythonCommand) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!pythonCommand.startsWith('python')) {
-            throw new Error(`not a valid python command`);
-        }
-        const allPythonVersions = tc.findAllVersions('Python');
-        core.info(`Versions of Python from tool-cache: ${allPythonVersions}`);
-        const allPyPyVersions = tc.findAllVersions('PyPy');
-        core.info(`Versions of PyPy from tool-cache: ${allPyPyVersions}`);
-        const retval = yield exec.exec(pythonCommand, ['--version'], true);
-        const output = retval.stdout.split(' ');
-        const version = semver.coerce(output[output.length - 1]);
-        core.info(`Detected version: ${version}`);
-        return {
-            success: retval.stderr === '' && retval.success,
-            version: version
-        };
-    });
-}
-exports.getVersion = getVersion;
-function hasModule(pythonCommand, module) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if ((yield exec.exec(pythonCommand, ['-c', `"import ${module}"`], false))
-            .success) {
-            core.info(`found python module ${module}`);
-            return true;
-        }
-        return false;
-    });
-}
-exports.hasModule = hasModule;
-
-
-/***/ }),
-
-/***/ 369:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.exec = void 0;
-const aexec = __importStar(__nccwpck_require__(514));
-const exec = (command, args = [], silent) => __awaiter(void 0, void 0, void 0, function* () {
-    let stdout = '';
-    let stderr = '';
-    const options = {
-        silent,
-        ignoreReturnCode: true,
-        listeners: {
-            stdout: (data) => {
-                stdout += data.toString();
-            },
-            stderr: (data) => {
-                stderr += data.toString();
-            }
-        }
-    };
-    const returnCode = yield aexec.exec(command, args, options);
-    return {
-        success: returnCode === 0,
-        stdout: stdout.trim(),
-        stderr: stderr.trim()
-    };
-});
-exports.exec = exec;
 
 
 /***/ }),
@@ -3286,6 +3032,170 @@ function _unique(values) {
     return Array.from(new Set(values));
 }
 //# sourceMappingURL=tool-cache.js.map
+
+/***/ }),
+
+/***/ 126:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const fs = __nccwpck_require__(747);
+const path = __nccwpck_require__(622);
+const {promisify} = __nccwpck_require__(669);
+const semver = __nccwpck_require__(911);
+
+const useNativeRecursiveOption = semver.satisfies(process.version, '>=10.12.0');
+
+// https://github.com/nodejs/node/issues/8987
+// https://github.com/libuv/libuv/pull/1088
+const checkPath = pth => {
+	if (process.platform === 'win32') {
+		const pathHasInvalidWinCharacters = /[<>:"|?*]/.test(pth.replace(path.parse(pth).root, ''));
+
+		if (pathHasInvalidWinCharacters) {
+			const error = new Error(`Path contains invalid characters: ${pth}`);
+			error.code = 'EINVAL';
+			throw error;
+		}
+	}
+};
+
+const processOptions = options => {
+	// https://github.com/sindresorhus/make-dir/issues/18
+	const defaults = {
+		mode: 0o777,
+		fs
+	};
+
+	return {
+		...defaults,
+		...options
+	};
+};
+
+const permissionError = pth => {
+	// This replicates the exception of `fs.mkdir` with native the
+	// `recusive` option when run on an invalid drive under Windows.
+	const error = new Error(`operation not permitted, mkdir '${pth}'`);
+	error.code = 'EPERM';
+	error.errno = -4048;
+	error.path = pth;
+	error.syscall = 'mkdir';
+	return error;
+};
+
+const makeDir = async (input, options) => {
+	checkPath(input);
+	options = processOptions(options);
+
+	const mkdir = promisify(options.fs.mkdir);
+	const stat = promisify(options.fs.stat);
+
+	if (useNativeRecursiveOption && options.fs.mkdir === fs.mkdir) {
+		const pth = path.resolve(input);
+
+		await mkdir(pth, {
+			mode: options.mode,
+			recursive: true
+		});
+
+		return pth;
+	}
+
+	const make = async pth => {
+		try {
+			await mkdir(pth, options.mode);
+
+			return pth;
+		} catch (error) {
+			if (error.code === 'EPERM') {
+				throw error;
+			}
+
+			if (error.code === 'ENOENT') {
+				if (path.dirname(pth) === pth) {
+					throw permissionError(pth);
+				}
+
+				if (error.message.includes('null bytes')) {
+					throw error;
+				}
+
+				await make(path.dirname(pth));
+
+				return make(pth);
+			}
+
+			try {
+				const stats = await stat(pth);
+				if (!stats.isDirectory()) {
+					throw new Error('The path is not a directory');
+				}
+			} catch (_) {
+				throw error;
+			}
+
+			return pth;
+		}
+	};
+
+	return make(path.resolve(input));
+};
+
+module.exports = makeDir;
+
+module.exports.sync = (input, options) => {
+	checkPath(input);
+	options = processOptions(options);
+
+	if (useNativeRecursiveOption && options.fs.mkdirSync === fs.mkdirSync) {
+		const pth = path.resolve(input);
+
+		fs.mkdirSync(pth, {
+			mode: options.mode,
+			recursive: true
+		});
+
+		return pth;
+	}
+
+	const make = pth => {
+		try {
+			options.fs.mkdirSync(pth, options.mode);
+		} catch (error) {
+			if (error.code === 'EPERM') {
+				throw error;
+			}
+
+			if (error.code === 'ENOENT') {
+				if (path.dirname(pth) === pth) {
+					throw permissionError(pth);
+				}
+
+				if (error.message.includes('null bytes')) {
+					throw error;
+				}
+
+				make(path.dirname(pth));
+				return make(pth);
+			}
+
+			try {
+				if (!options.fs.statSync(pth).isDirectory()) {
+					throw new Error('The path is not a directory');
+				}
+			} catch (_) {
+				throw error;
+			}
+		}
+
+		return pth;
+	};
+
+	return make(path.resolve(input));
+};
+
 
 /***/ }),
 

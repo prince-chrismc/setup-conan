@@ -4,11 +4,6 @@ author: 'prince-chrismc'
 branding:
   icon: 'package'  
   color: 'blue'
-inputs:
-  python:
-    required: false
-    description: 'the python command to execute such as `python` or `python3` which will be used to install Conan'
-    default: 'python3'
 runs:
   using: 'node12'
   main: 'dist/index.js'
