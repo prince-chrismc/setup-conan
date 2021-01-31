@@ -22,6 +22,9 @@ async function run(): Promise<void> {
     const extractedPath = await tc.extractTar(downloaded, destination)
     core.info(`Successfully extracted ${downloaded} to ${extractedPath}`)
 
+    const requirementsPath = path.join(extractedPath, 'requirements.txt')
+    exec.exec('pip', ['install', '-r', `${requirementsPath}`])
+
     const installPath = path.join(destination, 'installation')
     /*const returnCode: number = await*/ exec.exec('pip', [
       'install',
