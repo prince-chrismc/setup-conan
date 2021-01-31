@@ -41,7 +41,6 @@ const tc = __importStar(__nccwpck_require__(784));
 const exec = __importStar(__nccwpck_require__(514));
 const os = __importStar(__nccwpck_require__(87));
 const path = __importStar(__nccwpck_require__(622));
-const makeDir = __importStar(__nccwpck_require__(126));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -51,8 +50,6 @@ function run() {
             core.info(`successfully downloaded ${downloadUrl}`);
             const destination = path.join(os.tmpdir(), 'source');
             core.info(`Install destination is ${destination}`);
-            const destinationPath = yield makeDir.default(destination);
-            core.info(`Successfully created ${destinationPath}`);
             const extractedPath = yield tc.extractTar(downloaded, destination);
             core.info(`Successfully extracted ${downloaded} to ${extractedPath}`);
             const sourcePath = path.join(extractedPath, `conan-${version}`);
@@ -61,7 +58,7 @@ function run() {
             os.tmpdir();
             const installPath = path.join(os.tmpdir(), 'conan');
             /*const returnCode: number = await*/ exec.exec('pip', [
-                'install',
+                'install', '-v', '--disable-pip-version-check',
                 '-t',
                 `${installPath}`,
                 `${sourcePath}`
@@ -3036,170 +3033,6 @@ function _unique(values) {
     return Array.from(new Set(values));
 }
 //# sourceMappingURL=tool-cache.js.map
-
-/***/ }),
-
-/***/ 126:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const fs = __nccwpck_require__(747);
-const path = __nccwpck_require__(622);
-const {promisify} = __nccwpck_require__(669);
-const semver = __nccwpck_require__(911);
-
-const useNativeRecursiveOption = semver.satisfies(process.version, '>=10.12.0');
-
-// https://github.com/nodejs/node/issues/8987
-// https://github.com/libuv/libuv/pull/1088
-const checkPath = pth => {
-	if (process.platform === 'win32') {
-		const pathHasInvalidWinCharacters = /[<>:"|?*]/.test(pth.replace(path.parse(pth).root, ''));
-
-		if (pathHasInvalidWinCharacters) {
-			const error = new Error(`Path contains invalid characters: ${pth}`);
-			error.code = 'EINVAL';
-			throw error;
-		}
-	}
-};
-
-const processOptions = options => {
-	// https://github.com/sindresorhus/make-dir/issues/18
-	const defaults = {
-		mode: 0o777,
-		fs
-	};
-
-	return {
-		...defaults,
-		...options
-	};
-};
-
-const permissionError = pth => {
-	// This replicates the exception of `fs.mkdir` with native the
-	// `recusive` option when run on an invalid drive under Windows.
-	const error = new Error(`operation not permitted, mkdir '${pth}'`);
-	error.code = 'EPERM';
-	error.errno = -4048;
-	error.path = pth;
-	error.syscall = 'mkdir';
-	return error;
-};
-
-const makeDir = async (input, options) => {
-	checkPath(input);
-	options = processOptions(options);
-
-	const mkdir = promisify(options.fs.mkdir);
-	const stat = promisify(options.fs.stat);
-
-	if (useNativeRecursiveOption && options.fs.mkdir === fs.mkdir) {
-		const pth = path.resolve(input);
-
-		await mkdir(pth, {
-			mode: options.mode,
-			recursive: true
-		});
-
-		return pth;
-	}
-
-	const make = async pth => {
-		try {
-			await mkdir(pth, options.mode);
-
-			return pth;
-		} catch (error) {
-			if (error.code === 'EPERM') {
-				throw error;
-			}
-
-			if (error.code === 'ENOENT') {
-				if (path.dirname(pth) === pth) {
-					throw permissionError(pth);
-				}
-
-				if (error.message.includes('null bytes')) {
-					throw error;
-				}
-
-				await make(path.dirname(pth));
-
-				return make(pth);
-			}
-
-			try {
-				const stats = await stat(pth);
-				if (!stats.isDirectory()) {
-					throw new Error('The path is not a directory');
-				}
-			} catch (_) {
-				throw error;
-			}
-
-			return pth;
-		}
-	};
-
-	return make(path.resolve(input));
-};
-
-module.exports = makeDir;
-
-module.exports.sync = (input, options) => {
-	checkPath(input);
-	options = processOptions(options);
-
-	if (useNativeRecursiveOption && options.fs.mkdirSync === fs.mkdirSync) {
-		const pth = path.resolve(input);
-
-		fs.mkdirSync(pth, {
-			mode: options.mode,
-			recursive: true
-		});
-
-		return pth;
-	}
-
-	const make = pth => {
-		try {
-			options.fs.mkdirSync(pth, options.mode);
-		} catch (error) {
-			if (error.code === 'EPERM') {
-				throw error;
-			}
-
-			if (error.code === 'ENOENT') {
-				if (path.dirname(pth) === pth) {
-					throw permissionError(pth);
-				}
-
-				if (error.message.includes('null bytes')) {
-					throw error;
-				}
-
-				make(path.dirname(pth));
-				return make(pth);
-			}
-
-			try {
-				if (!options.fs.statSync(pth).isDirectory()) {
-					throw new Error('The path is not a directory');
-				}
-			} catch (_) {
-				throw error;
-			}
-		}
-
-		return pth;
-	};
-
-	return make(path.resolve(input));
-};
-
 
 /***/ }),
 

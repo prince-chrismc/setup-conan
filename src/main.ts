@@ -3,7 +3,6 @@ import * as tc from '@actions/tool-cache'
 import * as exec from '@actions/exec'
 import * as os from 'os'
 import * as path from 'path'
-import * as makeDir from 'make-dir'
 
 async function run(): Promise<void> {
   try {
@@ -15,8 +14,6 @@ async function run(): Promise<void> {
 
     const destination = path.join(os.tmpdir(), 'source')
     core.info(`Install destination is ${destination}`)
-    const destinationPath = await makeDir.default(destination)
-    core.info(`Successfully created ${destinationPath}`)
 
     const extractedPath = await tc.extractTar(downloaded, destination)
     core.info(`Successfully extracted ${downloaded} to ${extractedPath}`)
@@ -29,6 +26,8 @@ async function run(): Promise<void> {
     const installPath = path.join(os.tmpdir(), 'conan')
     /*const returnCode: number = await*/ exec.exec('pip', [
       'install',
+      '-v',
+      '--disable-pip-version-check',
       '-t',
       `${installPath}`,
       `${sourcePath}`
